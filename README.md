@@ -1,36 +1,158 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+prompt
 
-## Getting Started
+제목이 'INU 벽돌깨기'인 웹 기반 벽돌 깨기 게임을 제작해줘. PC와 모바일 모두에서 플레이 가능한 반응형 디자인으로 구성해야 해.
 
-First, run the development server:
+[1. 메인 화면 구성]
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+제목: 'INU 벽돌깨기'
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+구성 요소: 사용자 이름 입력창, '게임 시작' 버튼.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+이미지: 화면 중앙에 우리 대학 마스코트 '횃불이' 이미지를 배치해줘.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+제작자 정보: 하단에 202500620, 경제학과, 박성민을 텍스트로 추가해줘.
 
-## Learn More
+디자인: 깔끔하고 세련된 스타일로 자유롭게 구성하되, 전체적인 톤을 맞춰줘.
 
-To learn more about Next.js, take a look at the following resources:
+[2. 게임 규칙 및 메카닉]
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+벽돌 구성: 5행 × 8열 (총 40개). 연한 빨강, 연한 주황, 연한 노랑, 연한 파랑, 연한 녹색, 연한 보라색으로 랜덤 배치.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+특이 사항: 테스트를 위해 연한 빨강 블록을 전체의 30% 비중으로 배치하고, **연한 빨강 블록을 3개만 제거해도 즉시 게임 성공(종료)**으로 설정해줘.
 
-## Deploy on Vercel
+생명 시스템: 생명은 총 3번. 공이 하단으로 떨어지면 생명이 감소하며, 모두 소진 시 '게임 미션 실패' 메시지를 출력해. (실패 시 시간 측정은 중단)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+시작 시퀀스: 게임 시작 버튼을 누르면 화면에 '3, 2, 1' 카운트다운이 표시된 후 공이 움직이기 시작해야 해.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[3. 컨트롤 및 반응형 설정]
+
+PC 버전: 좌우 방향키(ArrowLeft, ArrowRight)로 패들을 부드럽게 조작.
+
+모바일 버전: 화면을 왼쪽/오른쪽으로 스와이프(Swipe)하여 패들이 이동하도록 구현하고, 전체 레이아웃이 화면 크기에 맞게 조절되는 반응형으로 제작해줘.
+
+[4. 사운드 및 효과]
+
+배경 음악: 게임 시작과 동시에 Hyper_Speed_Run.mp3 파일을 재생해. 볼륨은 배경음으로 적당하도록 낮게(약 0.3) 설정해줘.
+
+효과음: 공이 벽돌에 충돌할 때마다 타격 효과음을 출력해줘.
+
+성공 효과: 미션 완료 시 화면에 폭죽이 터지는 시각 효과를 추가해줘.
+
+[5. UI 및 기능 버튼]
+
+게임 화면 내 버튼: '일시정지', '다시 시작', '게임 종료' 버튼을 구성해.
+
+다시 시작: 이 버튼을 누르면 모든 데이터가 초기화되고 이름을 입력하는 첫 메인 화면으로 돌아가야 해.
+
+[6. 시간 측정 및 데이터 저장]
+
+타이머: 게임 시작(카운트다운 후)부터 미션 완료까지 시간을 '분:초' 단위로 측정해서 실시간으로 보여줘.
+
+결과 출력: 미션 성공 시 최종 소요 시간을 출력해.
+
+랭킹 시스템: 미션 성공 시 완료 시간을 구글 시트(Google Sheets)에 저장하고, 가장 기록이 빠른 상위 3명(Top 3)의 명예의 전당 리스트를 화면에 표시해줘
+======================================================================
+
+Hyper_Speed_Run.mp3
+ 여기 배경음이 있고, 마스코트도 있어 너가 수정해줘
+
+ =======================================================================
+
+ pc에서는 좌우방향키로만 패들이 이동하도록 하고, 패들에 히트박스 범위가 너무 작은거 같아 공이 패들안으로 반쯤들어가는 경우가 있어서 히트박스를 수정하든 물리엔진을 손보든 해줘
+
+
+ 랜덤 블럭생성이지만 너무 같은 색끼리 뭉쳐있지 않도록 해줘
+
+
+
+ 구글스프레드 시트에 저장되도록 할텐데 시트의 주소는 https://docs.google.com/spreadsheets/d/13pf4HI6jzLLNWaU1toNsJYVuoD1TyxoARoThmM9JIyA/edit?usp=sharing 이야
+시트에는 datetime, name, finishtime의 3개의 필드로 구생되어있고 각각 클리어한 일자와 시간, 플레이어 이름, 클리어시간을 기록해줘.
+이러한 저장과 불러오기를 위한 앱스스크립트 또한 만들어줘
+
+
+
+앱스스크립트 코드를 저장할 환경변수 파일을 만들고 그곳에 앱스스크립트 링크를 저장해줘(api)
+
+
+life표시가 비직관적인거 같아 조금더 직관적이게 하트모양으로 바꿔줘
+
+
+
+마지막에 뜨는 명예의 전당은 구글 스프레드 시트에서 불러오는걸로 해줘 그걸위해 앱스스크립트 코드를 수정해야한다면 수정해서 만들어줘
+
+
+
+지금 구글 스프레드시트에 저장도완되고 마지막에 뜨는 명예의 전당도 이상하게 떠 수정해줘
+
+
+
+2개씩 중복되서 기록이되 해결해줘
+
+
+
+피니쉬타임은(MM:SS)의 형태로 기록해주고, 명예의 전당도 그렇게 표현해줘
+
+
+
+화면이 pc에 맞지 않게 너무작은거 같아 반응형으로 동작할 수 있되 pc사이즈에 맞추어 컴포넌트와 화면크기를 개선해줘
+
+
+
+벽돌과 패들 사이 간격이 너무 좁아 다시 원래대로 넓혀줘
+
+
+
+finishtime값이 이상하게 표기돼 수정해줘
+
+
+
+분:초 형태로 출력하도록 바꿔줘
+
+
+
+여전히 출력이 이상하게 돼 수정해줘
+
+
+
+코드가 여전히 다르게 출력돼 수정해줘
+
+
+
+이번에는 기록이 안불러와져
+
+
+
+기본속도는 적당한데 가속도가 너무 빠른거 같아 조금만 낮춰줘
+
+
+
+그리고 클리어 할때 블럭이 안깨졌지만 닿았다고 판정되면서 클리어 화면이 출력되던데 약간의 수정을 해줘
+
+
+
+이번에는 0:00초로 출력돼 구글 시트에는 정상적으로 저장되는데 고쳐줘
+
+
+
+여전히 명예의 전당 출력이 잘못되게 나와 고쳐줘
+
+
+
+게임이 시작되면 ‘Hyper_Speed_Run.mp3’ 파일을 배경 음악으로 사용하고 볼륨이 너무 크지 않도록 설정해줘 지금은 소리가 안들려
+
+
+
+공이 블록에 충돌하면 효과음 출력하라 했는데 잘 출력되는거 맞지?
+
+
+
+게임이 시작되면 퍼블릭에 있는 ‘Hyper_Speed_Run.mp3’ 파일을 배경 음악으로 사용하고 볼륨이 너무 크지 않도록 설정해줘 지금은 효과음만 들리고 배경음이 안들려
+
+
+
+
+배경음 소리를 좀더 키워줘
+
+
+
+모바일 버전에서는 기본속도를 높이고 패들 근처에서 스와이프로 패들을 이동할 수 있도록 해줘
