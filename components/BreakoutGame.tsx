@@ -27,6 +27,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
   const [lives, setLives] = useState(3);
   const [time, setTime] = useState(0); // in seconds
   const [redDestroyed, setRedDestroyed] = useState(0);
+  const [scoreSaved, setScoreSaved] = useState(false);
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -98,7 +99,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
   };
 
   const initBricks = () => {
-    const rows = 4;
+    const rows = 5;
     const cols = 8;
     const totalBricks = rows * cols;
     
@@ -278,12 +279,12 @@ export default function BreakoutGame({ playerName }: BaseProps) {
     const drawBricks = () => {
       const { bricks, width } = engine.current;
       const cols = 8;
-      const rows = 4;
-      const padding = 6;
-      const offsetTop = 80 * engine.current.scale; // Increased and scaled to widen the gap
+      const rows = 5;
+      const padding = 4;
+      const offsetTop = 40;
       const offsetLeft = 10 * engine.current.scale;
       const brickWidth = (width - offsetLeft * 2 - padding * (cols - 1)) / cols;
-      const brickHeight = 24; // Slightly taller bricks
+      const brickHeight = 20;
 
       for (let c = 0; c < cols; c++) {
         for (let r = 0; r < rows; r++) {
@@ -307,12 +308,12 @@ export default function BreakoutGame({ playerName }: BaseProps) {
     const collisionDetection = () => {
       const { ball, bricks, width } = engine.current;
       const cols = 8;
-      const rows = 4;
-      const padding = 6;
+      const rows = 5;
+      const padding = 4;
       const offsetLeft = 10 * engine.current.scale;
       const brickWidth = (width - offsetLeft * 2 - padding * (cols - 1)) / cols;
-      const brickHeight = 24; // Match drawBricks
-      const offsetTop = 80 * engine.current.scale;
+      const brickHeight = 20;
+      const offsetTop = 40;
 
       for (let c = 0; c < cols; c++) {
         for (let r = 0; r < rows; r++) {
@@ -348,7 +349,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
                     setGameState('success');
                     if (bgmRef.current) bgmRef.current.pause();
                     const strTime = formatTime(stateRef.current.time);
-                    saveScore(strTime);
+                    saveScore(strTime); // saveScore will set scoreSaved=true when done
                   }, 400);
 
                   confetti({
@@ -373,6 +374,9 @@ export default function BreakoutGame({ playerName }: BaseProps) {
             });
         } catch (e) {
             console.error('Failed to save score', e);
+        } finally {
+            // Signal Rankings to fetch AFTER the score has been saved
+            setScoreSaved(true);
         }
     };
 
@@ -619,7 +623,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
              <Trophy className="mx-auto text-yellow-400 mb-4 w-16 h-16" />
             <h2 className="text-3xl font-black text-yellow-400 mb-2">미션 완료!</h2>
             <p className="text-slate-300 mb-2 text-lg">기록: <span className="font-bold text-white font-mono">{formatTime(time)}</span></p>
-            <Rankings time={time} playerName={playerName} />
+            <Rankings time={time} playerName={playerName} scoreSaved={scoreSaved} />
             <button onClick={handleRestart} className="mt-6 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition">
               처음으로
             </button>
@@ -630,18 +634,20 @@ export default function BreakoutGame({ playerName }: BaseProps) {
   );
 }
 
-function Rankings({ time: _time, playerName: _playerName }: { time: number, playerName: string }) {
+function Rankings({ time: _time, playerName: _playerName, scoreSaved }: { time: number, playerName: string, scoreSaved: boolean }) {
    const [ranks, setRanks] = useState<{name: string, time: any}[]>([]);
    const [loading, setLoading] = useState(true);
 
    useEffect(() => {
+       // Only fetch rankings after the score has been successfully saved
+       if (!scoreSaved) return;
        fetch('/api/ranking').then(res => res.json()).then(data => {
            setRanks(data.top3);
            setLoading(false);
        }).catch(() => {
            setLoading(false);
        });
-   }, []);
+   }, [scoreSaved]);
 
    if (loading) return <div className="text-slate-400 text-sm mt-4">명예의 전당 불러오는 중...</div>;
    
