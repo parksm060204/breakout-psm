@@ -56,6 +56,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
     keys: { ArrowLeft: false, ArrowRight: false },
     touchX: null as number | null,
     isInitialized: false,
+    width: 0,
     height: 0,
     redDestroyedCount: 0,
     scale: 1,
