@@ -7,7 +7,8 @@ let mockRankings: { name: string; time: string | number }[] = [
   { name: '성민', time: '02:40' },
 ];
 
-const SHEETS_API_URL = process.env.NEXT_PUBLIC_SHEET_URL;
+// Remove top-level constant to ensure runtime access in Vercel
+
 
 function standardizeTime(t: any): string {
   if (t === null || t === undefined || String(t).trim() === '') return '0:00';
@@ -43,6 +44,15 @@ function standardizeTime(t: any): string {
 
   const num = Number(str);
   if (!isNaN(num)) {
+    // If it's a very small number, it might be a Google Sheets duration (fraction of a day)
+    // Example: 10 seconds is 10 / 86400 = 0.0001157...
+    if (num > 0 && num < 1) {
+      const totalSeconds = Math.round(num * 24 * 60 * 60);
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+    
     if (Math.abs(num) > 1000000000) { 
       const d = new Date(num);
       return `${d.getMinutes()}:${d.getSeconds().toString().padStart(2, '0')}`;
@@ -95,7 +105,7 @@ export async function GET() {
             name: item.name,
             time: standardizeTime(item.time)
           }))
-          .filter(item => item.time !== '99:99')
+          .filter(item => item.name && item.name !== 'Unknown' && item.time !== '99:99')
           .sort((a, b) => parseTimeToSeconds(a.time) - parseTimeToSeconds(b.time));
 
         return NextResponse.json({ top3: formattedData.slice(0, 3) });
@@ -114,6 +124,8 @@ export async function POST(req: Request) {
   try {
     const body = await req.json(); // Expected: { name, time: "MM:SS" }
     
+    const SHEETS_API_URL = process.env.NEXT_PUBLIC_SHEET_URL;
+    
     if (SHEETS_API_URL) {
       // Send to Google Apps Script, prepending apostrophe so Sheets treats it as plain text
       const sheetPayload = {
@@ -125,6 +137,8 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sheetPayload),
       });
+    } else {
+      console.warn('NEXT_PUBLIC_SHEET_URL is not defined. Skipping Google Sheets update.');
     }
 
     // Update locally too for immediate feedback in session

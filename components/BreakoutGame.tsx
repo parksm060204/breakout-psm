@@ -61,6 +61,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
     redDestroyedCount: 0,
     scale: 1,
     isMobile: false,
+    hasWon: false,
   });
 
   const playHitSound = () => {
@@ -97,7 +98,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
   };
 
   const initBricks = () => {
-    const rows = 5;
+    const rows = 4;
     const cols = 8;
     const totalBricks = rows * cols;
     
@@ -224,6 +225,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
         } else {
           clearInterval(iv);
           setGameState('playing');
+          engine.current.hasWon = false; // Reset guard when game starts
           if (bgmRef.current) {
             bgmRef.current.play().catch((err) => {
               console.warn('Autoplay prevented. Waiting for user interaction...', err);
@@ -276,12 +278,12 @@ export default function BreakoutGame({ playerName }: BaseProps) {
     const drawBricks = () => {
       const { bricks, width } = engine.current;
       const cols = 8;
-      const rows = 5;
-      const padding = 4;
-      const offsetTop = 40;
+      const rows = 4;
+      const padding = 6;
+      const offsetTop = 80 * engine.current.scale; // Increased and scaled to widen the gap
       const offsetLeft = 10 * engine.current.scale;
       const brickWidth = (width - offsetLeft * 2 - padding * (cols - 1)) / cols;
-      const brickHeight = 20;
+      const brickHeight = 24; // Slightly taller bricks
 
       for (let c = 0; c < cols; c++) {
         for (let r = 0; r < rows; r++) {
@@ -305,11 +307,12 @@ export default function BreakoutGame({ playerName }: BaseProps) {
     const collisionDetection = () => {
       const { ball, bricks, width } = engine.current;
       const cols = 8;
-      const rows = 5;
-      const padding = 4;
+      const rows = 4;
+      const padding = 6;
       const offsetLeft = 10 * engine.current.scale;
       const brickWidth = (width - offsetLeft * 2 - padding * (cols - 1)) / cols;
-      const brickHeight = 20;
+      const brickHeight = 24; // Match drawBricks
+      const offsetTop = 80 * engine.current.scale;
 
       for (let c = 0; c < cols; c++) {
         for (let r = 0; r < rows; r++) {
@@ -337,7 +340,9 @@ export default function BreakoutGame({ playerName }: BaseProps) {
                 const newCount = engine.current.redDestroyedCount;
                 setRedDestroyed(newCount);
                 
-                if (newCount === 3) {
+                if (newCount === 3 && !engine.current.hasWon) {
+                  engine.current.hasWon = true; // Guard against multiple triggers
+                  
                   // Small delay to let the user see the final block break
                   setTimeout(() => {
                     setGameState('success');
@@ -544,7 +549,7 @@ export default function BreakoutGame({ playerName }: BaseProps) {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900 border-x border-slate-700 w-full max-w-4xl mx-auto shadow-2xl relative select-none">
+    <div className="flex flex-col h-screen bg-slate-900 border-x border-slate-700 w-full max-w-5xl mx-auto shadow-2xl relative select-none">
       {/* Header Info */}
       <div className="flex justify-between items-center p-4 bg-slate-800 text-white shadow-md z-10 space-x-2">
         <div className="flex items-center space-x-2 bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-600">
